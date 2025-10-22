@@ -1,7 +1,7 @@
 # Algo-genetique
 
 
-Pour cloner le repo, créer un dossier où le mettre, déplacer vous dans le dossier puis : git clone 
+Pour cloner le repo, créer un dossier où le mettre, déplacer vous dans le dossier puis : git clone https://github.com/cloeithr/Algo-genetique.git
 
 Ensuite pour ajouter un dossier/fonctionnalité au projet il faut créer une branche avec : git switch --create NomDeLaBranche Puis vous pouvez travailler depuis cette branche. Commandes importantes :
 
