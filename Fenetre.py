@@ -17,3 +17,6 @@ class Fenetre:
     def __repr__(self):
         "Affichage des bornes"
         return f"Fenetre({self.nom}: [{self.borne_min}, {self.borne_max}])"
+
+
+"test"
