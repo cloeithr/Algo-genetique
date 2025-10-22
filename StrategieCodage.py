@@ -25,7 +25,7 @@ class StrategieCodage(ABC):
 
 # Test local
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     print("=== Test de la classe abstraite StrategieCodage ===")
 
     # Exemple temporaire (bouchon)
