@@ -24,6 +24,7 @@ class Coordonnee:
     def __repr__(self):
         return f"{self.nom}={self.valeur:.3f}"
 
+#Test Local
 if __name__ == "__main__":
     f = Fenetre("x1", -10, 10)
     c = Coordonnee("x1", f)
