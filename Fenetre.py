@@ -20,3 +20,4 @@ class Fenetre:
         return f"Fenetre({self.nom}: [{self.borne_min}, {self.borne_max}])"
 
 
+"test"
