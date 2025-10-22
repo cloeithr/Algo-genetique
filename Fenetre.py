@@ -20,4 +20,8 @@ class Fenetre:
         return f"Fenetre({self.nom}: [{self.borne_min}, {self.borne_max}])"
 
 
-"test"
+if __name__ == "__main__":
+    f = Fenetre("x1", -5, 5)
+    print("Fenêtre :", f)
+    print("Valeur aléatoire :", f.generer_valeur())
+    print("Contient 2 :", f.contient(2))
