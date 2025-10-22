@@ -1,10 +1,10 @@
 import random
 
 class Individu: 
-    def __init__(self, coordonnees, fenetres, codage=None):
-        self.coordonnees = coordonnees       # Liste des xi
-        self.fenetres = fenetres             # Fenêtres de recherche pour chaque xi
-        self.codage = codage                 
+    def __init__(self, acoordonnees, afenetres, acodage=None):
+        self.coordonnees = acoordonnees       # Liste des xi
+        self.fenetres = afenetres             # Fenêtres de recherche pour chaque xi
+        self.codage = acodage                 
         self.binaire = None                  # Codage binaire
         self.performance = None              # Valeur de f(x)
         
