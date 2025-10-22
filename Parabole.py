@@ -12,3 +12,15 @@ class Parabole:
         """Calcule f(x) = Σ xi² pour une liste de coordonnées."""
         return sum(x ** 2 for x in coordonnees)
 
+
+if __name__ == '__main__':
+    from Parabole import Parabole
+
+    # Exemple de coordonnées
+    coordonnees = [2, -3, 1]
+
+    # Évaluer la fonction parabole
+    fitness = Parabole.evaluate(coordonnees)
+
+    print(f"Coordonnées : {coordonnees}")
+    print(f"Valeur de la fonction Parabole : {fitness}")

@@ -1,4 +1,5 @@
 from Individu import Individu
+from Performance import Performance
 import random
 
 class Population:
@@ -22,7 +23,7 @@ class Population:
     def evaluer(self):
         """Évalue tous les individus."""
         for individu in self.individus:
-            individu.evaluer(self.fonction_objectif)
+            Performance.evaluer(individu)
 
     def meilleur(self):
         """Retourne le meilleur individu."""
