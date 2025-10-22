@@ -57,7 +57,7 @@ if __name__ == '__main__':
     pop.evaluer()
     print("\nPopulation après évaluation :")
     for ind in pop.individus:
-        print(ind)
+        print(ind)  
 
     # Trouver le meilleur individu
     print("\nMeilleur individu :", pop.meilleur())
