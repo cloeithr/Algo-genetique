@@ -1,8 +1,4 @@
-# ===============================
-#  Fichier : Parabole.py
-#  Auteur  : Mouna BENSAID
-#  Rôle    : Fonction de performance (benchmark)
-#  ===============================
+
 
 class Parabole:
     """Fonction de performance : f(x1, x2, ..., xn) = somme des xi² (minimisation)."""
