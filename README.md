@@ -230,10 +230,10 @@ Population                         Opérateurs
 
 Répartition des classes :
 
-Mouna :Performance, Parabole
-Anis: Coordonnée, fenêtre 
+Mouna: Performance, Parabole
+Anis: Coordonnée, Fenêtre 
 Cloé: Population, Individu 
-Reda: crossover, Mantisse Exposante
-Fatima: Algo Génétique, mutation
+Reda: Crossover, Mantisse Exposante
+Fatima: Algo Génétique, Mutation
 Kodjo: Codage, Sélection 
 
