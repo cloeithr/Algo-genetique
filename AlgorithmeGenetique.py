@@ -10,9 +10,10 @@ Description :
 # Importation des classes nécessaires
 from Population import Population
 from OperateurSelection import OperateurSelection
-from CrossOver import CrossOver
+from CrossOver import OperateurCrossOver
 from OperateurMutation import OperateurMutation
-from Evaluation import EvaluationParabole
+from Performance import Performance
+
 
 # Ma classe 
 
