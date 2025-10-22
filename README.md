@@ -1,1 +1,1 @@
-# Algo-g-n-tique
+# Algo-genetique
