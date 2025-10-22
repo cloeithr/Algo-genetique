@@ -1,7 +1,7 @@
 import random
 from Individu import Individu 
 
-class Population:
+class Population: 
     def __init__(self, taille, fenetres, fonction_objectif, codage=None):
         self.taille = taille
         self.fenetres = fenetres

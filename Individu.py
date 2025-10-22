@@ -1,6 +1,6 @@
 import random
 
-class Individu:
+class Individu: 
     def __init__(self, coordonnees, fenetres, codage=None):
         self.coordonnees = coordonnees       # Liste des xi
         self.fenetres = fenetres             # Fenêtres de recherche pour chaque xi
