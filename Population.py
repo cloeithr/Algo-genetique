@@ -33,31 +33,3 @@ class Population:
         self.individus[index] = nouvel_individu  
         
 
-if __name__ == '__main__':
-    from Individu import Individu
-    import random
-
-    # Fonction objectif simple
-    def fonction_test(x):
-        return sum([xi**2 for xi in x])  # minimisation de x1² + x2²
-
-    # Fenêtres de recherche pour chaque coordonnée
-    fenetres = [(-5, 5), (-5, 5)]
-
-    # Créer une population
-    pop = Population(ataille=5, afenetres=fenetres, afonction_objectif=fonction_test)
-
-    # Initialiser les individus
-    pop.initialiser()
-    print("Population initiale :")
-    for ind in pop.individus:
-        print(ind)
-
-    # Évaluer tous les individus
-    pop.evaluer()
-    print("\nPopulation après évaluation :")
-    for ind in pop.individus:
-        print(ind)  
-
-    # Trouver le meilleur individu
-    print("\nMeilleur individu :", pop.meilleur())
