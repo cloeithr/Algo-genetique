@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     # Créer un individu aléatoire
     coordonnees = [random.uniform(-5, 5) for _ in range(2)]
-    ind = Individu(coordonnees, fenetres)
+    ind = Individu(coordonnees, fenetres)  
 
     # Évaluer l’individu
     print("Avant mutation :", ind)

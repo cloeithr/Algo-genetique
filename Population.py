@@ -30,4 +30,4 @@ class Population:
 
     def remplacer(self, nouvel_individu, index):
         """Remplace un individu à une position donnée."""
-        self.individus[index] = nouvel_individu
+        self.individus[index] = nouvel_individu  
