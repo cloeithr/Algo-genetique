@@ -1,54 +1,70 @@
+"""
+Classe : OperateurCrossOver
+Module : OperateurCrossOver.py
+Description :
+    Classe responsable du croisement multipoint entre deux individus.
+    Le croisement (crossover) combine les mantisses binaires des deux parents
+    pour générer deux enfants différents.
+"""
+
 import random
 
-class Crossover:
+class OperateurCrossOver:
     """Classe responsable du croisement multipoint entre deux individus."""
 
-    def __init__(self, aNb_points=2):
+    def __init__(self, aNbPoints: int = 2):
         """
-        nb_points : nombre de points de coupure.
-        Par défaut, on fait un crossover à 2 points.
+        Constructeur.
+        :param aNbPoints: nombre de points de coupure pour le croisement multipoint.
+        Par défaut, on réalise un crossover à 2 points.
         """
-        self.nb_points = aNb_points
+        self.nb_points = aNbPoints
 
     def appliquer(self, aParent1, aParent2):
         """
         Effectue un crossover multipoint entre deux parents (père, mère)
         et retourne deux enfants (e1, e2).
         """
-
-        # --- Étape 1️⃣ : Récupération des mantisses binaires des parents
-        m1 = aParent1.mantisse
-        m2 = aParent2.mantisse
+        # Étape 1 : Récupération des mantisses binaires des parents
+        m1, m2 = aParent1.mantisse, aParent2.mantisse
         taille = len(m1)
 
-        # --- Étape 2️⃣ : Vérification de cohérence
+        # Étape 2 : Vérification de cohérence
         if len(m1) != len(m2):
             raise ValueError("Les deux parents doivent avoir la même taille de mantisse")
 
-        # --- Étape 3️⃣ : Choix aléatoire des points de coupure ---
+        # Étape 3 : Choix aléatoire des points de coupure
         points = sorted(random.sample(range(1, taille), self.nb_points))
-        points = [0] + points + [taille]  # On ajoute le début et la fin pour couvrir toute la mantisse
+        points = [0] + points + [taille]
+        print(f"Points de coupure : {points[1:-1]}")
 
-        # --- Étape 4️⃣ : Construction des enfants par alternance de segments
+        # Étape 4 : Construction des enfants par alternance de segments
         enfant1, enfant2 = "", ""
         for i in range(len(points) - 1):
             debut, fin = points[i], points[i + 1]
-            if i % 2 == 0:  # segment pair → père → enfant1
+            if i % 2 == 0:
                 enfant1 += m1[debut:fin]
                 enfant2 += m2[debut:fin]
-            else:  # segment impair → mère → enfant1
+            else:
                 enfant1 += m2[debut:fin]
                 enfant2 += m1[debut:fin]
 
-        # --- Étape 5️⃣ : Création des nouveaux objets enfants ---
+        # Étape 5 : Création des nouveaux objets enfants
         e1 = type(aParent1)()
         e2 = type(aParent2)()
 
         e1.mantisse, e2.mantisse = enfant1, enfant2
         e1.exposant, e2.exposant = aParent1.exposant, aParent2.exposant
-        e1.signe, e2.signe = random.choice([aParent1.signe, aParent2.signe]), random.choice([aParent1.signe, aParent2.signe])
+        e1.signe = random.choice([aParent1.signe, aParent2.signe])
+        e2.signe = random.choice([aParent1.signe, aParent2.signe])
 
-        e1.decoder()
-        e2.decoder()
+        if hasattr(e1, "decoder"):
+            e1.decoder()
+        if hasattr(e2, "decoder"):
+            e2.decoder()
 
         return e1, e2
+
+    def __str__(self):
+        """Affichage lisible."""
+        return f"OperateurCrossOver(nb_points={self.nb_points})"
