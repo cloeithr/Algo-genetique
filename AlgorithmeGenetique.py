@@ -10,7 +10,7 @@ Description :
 # Importation des classes nécessaires
 from Population import Population
 from OperateurSelection import OperateurSelection
-from OperateurCroisement import OperateurCroisement
+from CrossOver import CrossOver
 from OperateurMutation import OperateurMutation
 from Evaluation import EvaluationParabole
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     class OperateurSelection:
         def selectionner(self, population): print(" Sélection"); return "P1", "P2"
 
-    class OperateurCroisement:
+    class CrossOver:
         def croiser(self, p1, p2): print(" Croisement"); return "E1", "E2"
 
     class OperateurMutation:
@@ -108,6 +108,6 @@ if __name__ == "__main__":
     class OperateurRemplacement:
         def remplacer(self, population, p1, p2, e1, e2): print("Remplacement effectué")
 
-    algo = AlgorithmeGenetique(Population(), OperateurSelection(), OperateurCroisement(), OperateurMutation(), OperateurRemplacement(), 5)
+    algo = AlgorithmeGenetique(Population(), OperateurSelection(), CrossOver(), OperateurMutation(), OperateurRemplacement(), 5)
     algo.initialiser_population()
     algo.lancer_evolution()
