@@ -2,87 +2,105 @@
 Classe : OperateurSelection
 Module : OperateurSelection.py
 Description :
-    Représente l'opérateur de sélection des individus dans l'algorithme génétique :
-        - Sélection par roulette (proportionnelle)
-        - Pour une MINIMISATION ⇒ on inverse les performances
+    Opérateur de sélection pour l'algorithme génétique.
+    Implémente une sélection par "roulette" adaptée à la MINIMISATION :
+
+        - Plus la performance est FAIBLE plus l'individu a de chance d'être sélectionné.
+        - On utilise des poids = 1 / (performance + epsilon).
+
+    La méthode principale selectionner(population) renvoie deux parents.
 """
 
 import random
+from Fenetre import Fenetre
+from Individu import Individu
+from Population import Population
 
 class OperateurSelection:
-    """Opérateur de sélection basé sur la roulette proportionnelle."""
+    """Opérateur de sélection par roulette (pour MINIMISATION)."""
 
     def __init__(self):
-        """Constructeur vide : pas de paramètre nécessaire."""
+        """Constructeur (pas de paramètre pour l'instant)."""
         pass
+
+    # SELECTION
+
 
     def selectionner(self, aPopulation):
         """
-        Sélectionne 2 parents dans la population.
-        La méthode utilise une roulette proportionnelle :
-            - plus la performance est FAIBLE → meilleur l'individu
-            - comme minimisation : poids = 1 / (performance + epsilon)
+        Sélectionne deux parents dans la population à l'aide d'une roulette pondérée.
+
+        :param aPopulation: objet Population, qui contient une liste d'individus
+                            avec leur attribut 'performance' déjà évalué.
+        :return: (parent1, parent2)
         """
 
         individus = aPopulation.individus
 
-        # Récupération des performances
-        perfs = [ind.performance for ind in individus]
+        # On récupère les performances (f(x)).
+        performances = [ind.performance for ind in individus]
 
-        # Sécurité : éviter la division par zéro
+        # Sécurité : s'assurer qu'ils sont tous évalués
+        if any(p is None for p in performances):
+            raise ValueError("Tous les individus doivent avoir une performance avant la sélection.")
+
+        # On veut faire une MINIMISATION :
+        # → plus performance est PETITE → plus probabilité est GRANDE.
         epsilon = 1e-9
+        poids = [1.0 / (p + epsilon) for p in performances]
 
-        # MINIMISATION  on transforme la performance en poids inverse
-        poids = [(1 / (p + epsilon)) for p in perfs]
-
-        # Sélection proportionnelle
+        # On choisit deux parents (avec remise possible)
         parent1 = random.choices(individus, weights=poids, k=1)[0]
         parent2 = random.choices(individus, weights=poids, k=1)[0]
 
-        print(f"[Sélection] Parent1 = {parent1}")
-        print(f"[Sélection] Parent2 = {parent2}")
+        print(f"[Selection] Parent1 : {parent1}")
+        print(f"[Selection] Parent2 : {parent2}")
 
         return parent1, parent2
 
 
+    # AFFICHAGE
+
 
     def __str__(self):
-        return "OperateurSelection(roulette)"
+        return "OperateurSelection(roulette minimisation)"
 
 
-
-#TEST LOCAL
+# TEST LOCAL (MAIN)
 
 
 if __name__ == "__main__":
-    print("Test de OperateurSelection")
+    print("=== Test LOCAL de OperateurSelection ===")
 
-    import random
 
-    # Classe Individu fictive pour test
-    class IndividuTest:
-        def __init__(self, nom, perf):
-            self.nom = nom
-            self.performance = perf
+    # 1) Fenêtres
+    fen1 = Fenetre("x1", -5, 5)
+    fen2 = Fenetre("x2", -5, 5)
+    fenetres = [fen1, fen2]
 
-        def __str__(self):
-            return f"{self.nom}(perf={self.performance})"
+    # 2) Fonction objectif simple (parabole)
+    def f_test(x):
+        return sum(v ** 2 for v in x)
 
-    # Population fictive
-    class PopTest:
-        def __init__(self):
-            self.individus = [
-                IndividuTest("A", 10),
-                IndividuTest("B", 4),
-                IndividuTest("C", 1),   # meilleur
-                IndividuTest("D", 20)
-            ]
+    # 3) Création d'une population
+    pop = Population(
+        aTaille=5,
+        aFenetres=fenetres,
+        aFonctionObjectif=f_test
+    )
 
-    pop = PopTest()
-    sel = OperateurSelection()
+    pop.initialiser()
+    pop.evaluer()
 
-    parent1, parent2 = sel.selectionner(pop)
+    print("\nPopulation évaluée :")
+    print(pop)
 
-    print("\nParents sélectionnés :")
-    print(parent1)
-    print(parent2)
+    # 4) Opérateur de sélection
+    selec = OperateurSelection()
+
+    print("\nSélection de deux parents :")
+    p1, p2 = selec.selectionner(pop)
+
+    print("\nParents retournés :")
+    print("Parent 1 :", p1)
+    print("Parent 2 :", p2)
