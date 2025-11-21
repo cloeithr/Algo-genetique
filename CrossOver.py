@@ -1,13 +1,23 @@
 """
 Classe : OperateurCrossOver
-Module : OperateurCrossOver.py
+Module : CrossOver.py
 Description :
-    Classe responsable du croisement multipoint entre deux individus.
-    Le croisement (crossover) combine les mantisses binaires des deux parents
-    pour générer deux enfants différents.
+    Opérateur de croisement multipoint pour l'algorithme génétique.
+
+    - Si les parents possèdent un attribut 'code' (génome binaire, mantisse/exposant),
+      le croisement s'effectue sur ce code.
+    - Sinon, le croisement est réalisé directement sur les valeurs réelles
+      de leurs coordonnées.
+
+    Le croisement multipoint consiste à :
+        - choisir N points de coupure,
+        - découper les deux génomes en segments,
+        - alterner les segments (P1/P2) pour produire deux enfants.
 """
 
 import random
+from Fenetre import Fenetre
+from Coordonnee import Coordonnee
 
 class OperateurCrossOver:
     """Classe responsable du croisement multipoint entre deux individus."""
@@ -15,56 +25,147 @@ class OperateurCrossOver:
     def __init__(self, aNbPoints: int = 2):
         """
         Constructeur.
-        :param aNbPoints: nombre de points de coupure pour le croisement multipoint.
-        Par défaut, on réalise un crossover à 2 points.
+        :param aNbPoints: nombre de points de coupure (>= 1)
         """
+        if aNbPoints < 1:
+            raise ValueError("Le nombre de points de coupure doit être au moins 1.")
         self.nb_points = aNbPoints
 
-    def appliquer(self, aParent1, aParent2):
+
+    def croiser(self, aParent1, aParent2):
         """
-        Effectue un crossover multipoint entre deux parents (père, mère)
-        et retourne deux enfants (e1, e2).
+        Effectue un croisement multipoint entre deux parents
+        et retourne deux enfants.
+
+        Stratégie :
+            - si les parents possèdent un génome 'code' non nul,
+              le croisement s'effectue sur ce code ;
+            - sinon, le croisement s'effectue sur la liste des valeurs
+              des coordonnées (réels).
         """
-        # Étape 1 : Récupération des mantisses binaires des parents
-        m1, m2 = aParent1.mantisse, aParent2.mantisse
-        taille = len(m1)
 
-        # Étape 2 : Vérification de cohérence
-        if len(m1) != len(m2):
-            raise ValueError("Les deux parents doivent avoir la même taille de mantisse")
+        # 1) Déterminer le support de croisement : génome ou valeurs réelles
 
-        # Étape 3 : Choix aléatoire des points de coupure
-        points = sorted(random.sample(range(1, taille), self.nb_points))
-        points = [0] + points + [taille]
-        print(f"Points de coupure : {points[1:-1]}")
+        mode = None
 
-        # Étape 4 : Construction des enfants par alternance de segments
-        enfant1, enfant2 = "", ""
+        if hasattr(aParent1, "code") and hasattr(aParent2, "code") \
+           and (aParent1.code is not None) and (aParent2.code is not None):
+            # Mode "code" (binaire / mantisse-exposant…)
+            genome1 = aParent1.code
+            genome2 = aParent2.code
+            mode = "code"
+
+        else:
+            # Mode "réel" : on travaille directement sur les valeurs des coordonnées
+            genome1 = [c.valeur for c in aParent1.coordonnees]
+            genome2 = [c.valeur for c in aParent2.coordonnees]
+            mode = "reel"
+
+        # 2) Vérifications de cohérence
+
+        if len(genome1) != len(genome2):
+            raise ValueError("Les deux parents doivent avoir des génomes de même taille.")
+
+        taille = len(genome1)
+        if taille < 2:
+            raise ValueError("Le génome doit avoir au moins 2 éléments pour le croisement.")
+
+        # Nombre de points effective : ne peut pas dépasser taille - 1
+        nb_points_eff = min(self.nb_points, taille - 1)
+
+        # 3) Tirage des points de coupure et construction des segments
+
+        points = sorted(random.sample(range(1, taille), nb_points_eff))
+        points = [0] + points + [taille]  # on encadre début et fin
+
+        enfant1_genome = []
+        enfant2_genome = []
+
+        # On alterne les segments entre parent1 et parent2
         for i in range(len(points) - 1):
-            debut, fin = points[i], points[i + 1]
+            start, end = points[i], points[i + 1]
+
+            # Segment de P1 et P2
+            seg1 = genome1[start:end]
+            seg2 = genome2[start:end]
+
             if i % 2 == 0:
-                enfant1 += m1[debut:fin]
-                enfant2 += m2[debut:fin]
+                # Segment pair : enfant1 <- P1, enfant2 <- P2
+                enfant1_genome.extend(seg1)
+                enfant2_genome.extend(seg2)
             else:
-                enfant1 += m2[debut:fin]
-                enfant2 += m1[debut:fin]
+                # Segment impair : enfant1 <- P2, enfant2 <- P1
+                enfant1_genome.extend(seg2)
+                enfant2_genome.extend(seg1)
 
-        # Étape 5 : Création des nouveaux objets enfants
-        e1 = type(aParent1)()
-        e2 = type(aParent2)()
+        # 4) Création des objets enfants
 
-        e1.mantisse, e2.mantisse = enfant1, enfant2
-        e1.exposant, e2.exposant = aParent1.exposant, aParent2.exposant
-        e1.signe = random.choice([aParent1.signe, aParent2.signe])
-        e2.signe = random.choice([aParent1.signe, aParent2.signe])
+        enfant1 = type(aParent1)(aParent1.fenetres, aParent1.codage)
+        enfant2 = type(aParent2)(aParent2.fenetres, aParent2.codage)
 
-        if hasattr(e1, "decoder"):
-            e1.decoder()
-        if hasattr(e2, "decoder"):
-            e2.decoder()
+        # On invalide leur performance (à réévaluer ensuite)
+        enfant1.performance = None
+        enfant2.performance = None
 
-        return e1, e2
+        if mode == "code":
+            # On assigne le génome binaire et on décode vers les coordonnées
+            enfant1.code = enfant1_genome if isinstance(enfant1_genome, str) else "".join(enfant1_genome)
+            enfant2.code = enfant2_genome if isinstance(enfant2_genome, str) else "".join(enfant2_genome)
+
+            if hasattr(enfant1, "decoder"):
+                enfant1.decoder()
+            if hasattr(enfant2, "decoder"):
+                enfant2.decoder()
+
+        else:  # mode == "reel"
+            # On met à jour les valeurs des coordonnées
+            for coord, val in zip(enfant1.coordonnees, enfant1_genome):
+                coord.valeur = val
+            for coord, val in zip(enfant2.coordonnees, enfant2_genome):
+                coord.valeur = val
+
+        return enfant1, enfant2
+
+
 
     def __str__(self):
-        """Affichage lisible."""
-        return f"OperateurCrossOver(nb_points={self.nb_points})"
+        return f"OperateurCrossOver(multipoint, nb_points={self.nb_points})"
+
+
+# TEST LOCAL
+
+if __name__ == "__main__":
+    print("=== Test de OperateurCrossOver (mode réel) ===")
+
+
+
+    class IndividuReel:
+        """Petit bouchon d'individu pour tester le croisement sur des réels."""
+        def __init__(self, aFenetres, aCodage=None):
+            self.fenetres = aFenetres
+            self.codage = aCodage
+            self.coordonnees = [Coordonnee(f"X{i+1}", f) for i, f in enumerate(aFenetres)]
+            self.code = None
+            self.performance = None
+
+        def __str__(self):
+            coords = ", ".join(str(c) for c in self.coordonnees)
+            return f"IndividuReel({coords})"
+
+    # Fenêtres
+    fen1 = Fenetre("x1", -5, 5)
+    fen2 = Fenetre("x2", -5, 5)
+    fenetres = [fen1, fen2]
+
+    # Création de 2 parents
+    p1 = IndividuReel(fenetres)
+    p2 = IndividuReel(fenetres)
+    print("Parent 1 :", p1)
+    print("Parent 2 :", p2)
+
+    # Croisement
+    op = OperateurCrossOver(aNbPoints=1)
+    e1, e2 = op.croiser(p1, p2)
+
+    print("\nEnfant 1 :", e1)
+    print("Enfant 2 :", e2)
