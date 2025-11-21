@@ -97,3 +97,5 @@ if __name__ == "__main__":
     exemple = NomDeClasse(aParametre01="test", aParametre02=10)
     print(exemple)
     exemple.action01_nom_action()
+import Performance
+print(Performance.__file__)

@@ -1,86 +1,117 @@
-import random
+"""
+Classe : Individu
+Module : Individu.py
+Description :
+    Représente un individu de l'algorithme génétique.
+    Un individu contient :
+        - une liste de Coordonnee
+        - une stratégie de codage (optionnelle)
+        - une performance évaluée par une fonction objectif
 
-class Individu: 
-    def __init__(self, acoordonnees, afenetres, acodage=None):
-        self.coordonnees = acoordonnees       # Liste des xi
-        self.fenetres = afenetres             # Fenêtres de recherche pour chaque xi
-        self.codage = acodage                 
-        self.binaire = None                  # Codage binaire
-        self.performance = None              # Valeur de f(x)
-        
-    def evaluer(self, fonction_objectif):
-        """Calcule et stocke la performance de l'individu."""
-        self.performance = fonction_objectif(self.coordonnees)
-        return self.performance 
-  
-    def muter(self, taux_mutation):
-        if self.codage and self.binaire:
-            # Mutation sur le code binaire
-            self.binaire = self.codage.mutation(self.binaire, taux_mutation)
-            # Mettre à jour les coordonnées réelles
-            self.coordonnees = self.codage.decoder(self.binaire)
-        else:
-            # Mutation classique sur les coordonnées réelles
-            for i, (xmin, xmax) in enumerate(self.fenetres):
-                if random.random() < taux_mutation:
-                    amplitude = (xmax - xmin) * 0.1
-                    self.coordonnees[i] += random.uniform(-amplitude, amplitude)
-                    self.coordonnees[i] = max(min(self.coordonnees[i], xmax), xmin)
-                    
-    def croiser(self, parent1, parent2):
-        if parent1.codage and parent1.binaire and parent2.binaire:
-            # Croisement sur le code binaire
-            enfant1_binaire, enfant2_binaire = parent1.codage.croiser(parent1.binaire, parent2.binaire)
-            e1 = Individu(parent1.codage.decoder(enfant1_binaire), parent1.fenetres, parent1.codage)
-            e1.binaire = enfant1_binaire
-            e2 = Individu(parent2.codage.decoder(enfant2_binaire), parent2.fenetres, parent2.codage)
-            e2.binaire = enfant2_binaire
-            return e1, e2
-        else:
-            # Croisement sur les coordonnées réelles (ton code actuel)
-            enfant1_coord, enfant2_coord = [], []
-            for x1, x2 in zip(parent1.coordonnees, parent2.coordonnees):
-                if random.random() < 0.5:
-                    enfant1_coord.append(x1)
-                    enfant2_coord.append(x2)
-                else:
-                    enfant1_coord.append(x2)
-                    enfant2_coord.append(x1)
-            return Individu(enfant1_coord, self.fenetres, self.codage), \
-                Individu(enfant2_coord, self.fenetres, self.codage)
+    Il sait :
+        - encoder / décoder ses coordonnées
+        - muter
+        - se croiser via un opérateur externe
+        - s'auto-évaluer
+"""
+
+import random
+from Coordonnee import Coordonnee
+from Fenetre import Fenetre
+from Performance import Performance
+
+
+class Individu:
+
+    def __init__(self, aFenetres, aCodage=None):
+        """
+        Constructeur.
+        :param aFenetres: liste d'objets Fenetre (une par coordonnée)
+        :param aCodage: stratégie de codage (optionnelle)
+        """
+        self.fenetres = aFenetres
+        self.coordonnees = [Coordonnee(f"X{i+1}", fen) for i, fen in enumerate(aFenetres)]
+        self.codage = aCodage
+
+        self.code = None        # représentation codée (binaire, mantisse/exposant…)
+        self.performance = None
+
+    #   ENCODAGE / DÉCODAGE
+
 
     def encoder(self):
+        """Encode les coordonnées en représentation interne (si codage fourni)."""
         if self.codage:
-            self.binaire = self.codage.encoder(self.coordonnees)
+            valeurs = [c.valeur for c in self.coordonnees]
+            self.code = self.codage.encoder(valeurs)
 
     def decoder(self):
-        if self.codage and self.binaire:
-            self.coordonnees = self.codage.decoder(self.binaire)
-            
+        """Décode la représentation interne vers les coordonnées (si codage fourni)."""
+        if self.codage and self.code is not None:
+            valeurs = self.codage.decoder(self.code)
+            for c, v in zip(self.coordonnees, valeurs):
+                c.valeur = v
+
+
+    #   MUTATION
+
+
+    def muter(self, aTauxMutation, aAmplitude=0.1):
+        """
+        Applique une mutation à chaque coordonnée.
+        :param aTauxMutation: probabilité de mutation
+        :param aAmplitude: amplitude relative de la mutation
+        """
+        for c in self.coordonnees:
+            c.muter(aTauxMutation, aAmplitude)
+
+        # performance invalide après mutation
+        self.performance = None
+
+    #   PERFORMANCE
+
+
+    def evaluer(self, aFonctionObjectif):
+        """Évalue l'individu et stocke la performance."""
+        valeurs = [c.valeur for c in self.coordonnees]
+        self.performance = aFonctionObjectif(valeurs)
+        return self.performance
+
+
+    #   AFFICHAGE
+
+
+    def __str__(self):
+        coords = ", ".join(str(c) for c in self.coordonnees)
+        return f"Individu({coords}) → perf = {self.performance}"
+
     def __repr__(self):
-        """ Pour faciliter le debogage et l'affichage d'un individu. """
-        return f"Individu(coordonnees={self.coordonnees}, perf={self.performance})"
+        return self.__str__()
 
 
-if __name__ == '__main__':
 
-    # Définir une fonction objectif simple
-    def fonction_test(x):
-        # Exemple : on veut minimiser f(x1, x2) = x1² + x2²
-        return x[0]**2 + x[1]**2
+# TEST LOCAL 
 
-    # Définir la fenêtre de recherche pour chaque coordonnée
-    fenetres = [(-5, 5), (-5, 5)]
+if __name__ == "__main__":
+    print("Test de la classe Individu ")
 
-    # Créer un individu aléatoire
-    coordonnees = [random.uniform(-5, 5) for _ in range(2)]
-    ind = Individu(coordonnees, fenetres)  
+    # Création de 2 fenêtres
+    fen1 = Fenetre("x1", -5, 5)
+    fen2 = Fenetre("x2", -5, 5)
 
-    # Évaluer l’individu
-    print("Avant mutation :", ind)
-    ind.evaluer(fonction_test)
-    print("Performance :", ind.performance)
+    # Création d'un individu
+    ind = Individu([fen1, fen2])
+    print("Individu généré :", ind)
 
-    # Appliquer une mutation
-    ind.muter(taux_mutation=0.5)
+    # Évaluation
+    ind.evaluer(Performance.evaluate)
+    print("Après évaluation :", ind)
+
+    # Mutation
+    print("\nMutation…")
+    ind.muter(aTauxMutation=1.0)  # mutation forcée
     print("Après mutation :", ind)
+
+    # Réévaluation
+    ind.evaluer(Performance.evaluate)
+    print("Performance finale :", ind.performance)
