@@ -66,9 +66,9 @@ if __name__ == "__main__":
 
     # Création d'une coordonnée
     c = Coordonnee("x1", fen)
-    print("Valeur initiale :", c)
+    print("Valeur initiale p:", c)
 
-    # Test mutation
+    # Test mutationgfhjfghgfht
     print("\nMutation (taux=1.0 pour être sûr de muter) :")
     c.muter(aTauxMutation=1.0)
     print("Après mutation :", c)
@@ -76,4 +76,4 @@ if __name__ == "__main__":
     # Test regénération
     print("\nRegénération :")
     c.generer_aleatoire()
-    print("Nouvelle valeur :", c)
+    print("Nouvelle valeur deff:", c)
