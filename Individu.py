@@ -2,116 +2,116 @@
 Classe : Individu
 Module : Individu.py
 Description :
-    Représente un individu de l'algorithme génétique.
-    Un individu contient :
+    Représente un individu dans l'algorithme génétique.
+    Il contient :
         - une liste de Coordonnee
         - une stratégie de codage (optionnelle)
-        - une performance évaluée par une fonction objectif
-
-    Il sait :
-        - encoder / décoder ses coordonnées
-        - muter
-        - se croiser via un opérateur externe
-        - s'auto-évaluer
+        - un génome (optionnel)
+        - une performance
 """
 
-import random
 from Coordonnee import Coordonnee
 from Fenetre import Fenetre
-from Performance import Performance
+import random
 
 
 class Individu:
 
     def __init__(self, aFenetres, aCodage=None):
         """
-        Constructeur.
-        :param aFenetres: liste d'objets Fenetre (une par coordonnée)
+        :param aFenetres: liste d'objets Fenetre
         :param aCodage: stratégie de codage (optionnelle)
         """
         self.fenetres = aFenetres
-        self.coordonnees = [Coordonnee(f"X{i+1}", fen) for i, fen in enumerate(aFenetres)]
         self.codage = aCodage
 
-        self.code = None        # représentation codée (binaire, mantisse/exposant…)
+        # Création des coordonnées
+        self.coordonnees = [Coordonnee(f"X{i+1}", fen) for i, fen in enumerate(aFenetres)]
+
+        # Initialisation aléatoire des valeurs réelles
+        for c in self.coordonnees:
+            c.valeur = c.fenetre.generer_valeur()
+
+        # Génome (si codage utilisé)
+        self.genome = None
+
+        # Performance
         self.performance = None
 
-    #   ENCODAGE / DÉCODAGE
 
+    # ENCODAGE / DECODAGE 
 
     def encoder(self):
-        """Encode les coordonnées en représentation interne (si codage fourni)."""
-        if self.codage:
-            valeurs = [c.valeur for c in self.coordonnees]
-            self.code = self.codage.encoder(valeurs)
+        """Encode les valeurs réelles dans un génome via la stratégie de codage."""
+        if self.codage is None:
+            raise NotImplementedError("Aucune stratégie de codage n'a été fournie.")
+        valeurs = [c.valeur for c in self.coordonnees]
+        self.genome = self.codage.encoder(valeurs)
 
     def decoder(self):
-        """Décode la représentation interne vers les coordonnées (si codage fourni)."""
-        if self.codage and self.code is not None:
-            valeurs = self.codage.decoder(self.code)
-            for c, v in zip(self.coordonnees, valeurs):
-                c.valeur = v
+        """Décode un génome vers les valeurs réelles."""
+        if self.codage is None:
+            raise NotImplementedError("Aucune stratégie de codage n'a été fournie.")
+        valeurs = self.codage.decoder(self.genome)
+        for c, v in zip(self.coordonnees, valeurs):
+            c.valeur = v
 
 
-    #   MUTATION
+    # MUTATION 
 
-
-    def muter(self, aTauxMutation, aAmplitude=0.1):
-        """
-        Applique une mutation à chaque coordonnée.
-        :param aTauxMutation: probabilité de mutation
-        :param aAmplitude: amplitude relative de la mutation
-        """
+    def muter(self, taux, amplitude=0.1):
+        """Mutation des coordonnées réelles."""
         for c in self.coordonnees:
-            c.muter(aTauxMutation, aAmplitude)
-
-        # performance invalide après mutation
-        self.performance = None
-
-    #   PERFORMANCE
+            c.muter(taux, amplitude)
+        self.performance = None  # performance invalide après mutation
 
 
-    def evaluer(self, aFonctionObjectif):
-        """Évalue l'individu et stocke la performance."""
+    # EVALUATION
+
+    def evaluer(self, fonction_objectif):
+        """Évalue l'individu avec une fonction f(x)."""
         valeurs = [c.valeur for c in self.coordonnees]
-        self.performance = aFonctionObjectif(valeurs)
+        self.performance = fonction_objectif(valeurs)
         return self.performance
 
 
-    #   AFFICHAGE
-
+    # AFFICHAGE
 
     def __str__(self):
-        coords = ", ".join(str(c) for c in self.coordonnees)
-        return f"Individu({coords}) → perf = {self.performance}"
+        valeurs = ", ".join(f"{c.nom}={c.valeur:.4f}" for c in self.coordonnees)
+        return f"Individu({valeurs}) -> perf={self.performance}"
 
     def __repr__(self):
         return self.__str__()
 
 
+# TEST LOCAL (MAIN)
 
-# TEST LOCAL 
 
 if __name__ == "__main__":
-    print("Test de la classe Individu ")
+    print("Test LOCAL de la classe Individu")
 
     # Création de 2 fenêtres
     fen1 = Fenetre("x1", -5, 5)
     fen2 = Fenetre("x2", -5, 5)
 
+    # Fonction de performance simple (parabole)
+    def f_test(x):
+        return sum(xi ** 2 for xi in x)
+
     # Création d'un individu
     ind = Individu([fen1, fen2])
-    print("Individu généré :", ind)
+    print("Individu initial :", ind)
 
     # Évaluation
-    ind.evaluer(Performance.evaluate)
+    ind.evaluer(f_test)
     print("Après évaluation :", ind)
 
     # Mutation
-    print("\nMutation…")
-    ind.muter(aTauxMutation=1.0)  # mutation forcée
+    print("\nMutation...")
+    ind.muter(taux=1.0)  # mutation forcée 100%
     print("Après mutation :", ind)
 
-    # Réévaluation
-    ind.evaluer(Performance.evaluate)
+    # Nouvelle évaluation
+    ind.evaluer(f_test)
     print("Performance finale :", ind.performance)
