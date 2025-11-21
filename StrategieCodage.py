@@ -2,37 +2,54 @@
 Classe : StrategieCodage
 Module : StrategieCodage.py
 Description :
-    Classe abstraite qui définit l’interface pour les différentes stratégies de codage
-    des individus (ex : binaire, mantisse/exposant, réel…).
+    Interface abstraite définissant les méthodes de codage/décodage
+    nécessaires pour tout type de représentation d'un individu
+    (ex : codage binaire, codage mantisse/exposant, codage réel…).
 """
 
 from abc import ABC, abstractmethod
 
+
 class StrategieCodage(ABC):
-    """Interface de base pour toutes les stratégies de codage."""
+    """
+    Classe abstraite pour toutes les stratégies de codage.
+    Toute classe fille doit implémenter :
+      - encoder(coordonnees)
+      - decoder(code)
+    """
 
     @abstractmethod
-    def encoder(self, valeur):
-        """Encode une valeur réelle en représentation interne (ex : binaire)."""
+    def encoder(self, aCoordonnees):
+        """
+        Encode une liste de valeurs réelles en une représentation interne.
+        Exemple : convertir [x1, x2] en un code binaire.
+        """
         pass
 
     @abstractmethod
-    def decoder(self, code):
-        """Décode une représentation interne vers une valeur réelle."""
+    def decoder(self, aCode):
+        """
+        Décode une représentation interne vers une liste de valeurs réelles.
+        Exemple : convertir un code binaire vers [x1, x2].
+        """
         pass
 
 
 
-# Test local
+# TEST LOCAL
 
 if __name__ == "__main__":
-    print("=== Test de la classe abstraite StrategieCodage ===")
+    print("=== Test de la classe StrategieCodage ===")
 
-    # Exemple temporaire (bouchon)
-    class CodageReel(StrategieCodage):
-        def encoder(self, valeur): return valeur
-        def decoder(self, code): return code
+    # Exemple de classe fille "bouchon" juste pour le test
+    class CodageIdentite(StrategieCodage):
+        """Codage trivial : encode = decode = identique"""
+        def encoder(self, aCoordonnees):
+            return aCoordonnees
 
-    codage = CodageReel()
-    print("Encodage 5.2 ->", codage.encoder(5.2))
-    print("Décodage 5.2 ->", codage.decoder(5.2))
+        def decoder(self, aCode):
+            return aCode
+
+    cod = CodageIdentite()
+    print("Encodage :", cod.encoder([1.5, -2.3]))
+    print("Décodage :", cod.decoder([1.5, -2.3]))
