@@ -2,70 +2,91 @@
 Classe : OperateurMutation
 Module : OperateurMutation.py
 Description :
-    Représente l'opérateur de mutation utilisé dans l'algorithme génétique.
-    La mutation introduit une petite variation aléatoire sur un individu
-    pour maintenir la diversité dans la population.
+    Implémente l'opérateur de mutation de l'algorithme génétique.
+    Deux cas sont pris en charge :
+        - mutation binaire (0 ↔ 1)
+        - mutation réelle (variation dans la fenêtre)
 """
 
 import random
+from Fenetre import Fenetre
+from Coordonnee import Coordonnee
+from Individu import Individu
 
 class OperateurMutation:
-    """Classe qui gère la mutation des individus."""
+    """Opérateur de mutation générique."""
 
-    def __init__(self, aTauxMutation: float = 0.05, aAmplitude: float = 0.1):
+    def __init__(self, aTauxMutation: float = 0.05):
         """
-        Constructeur.
-        :param aTauxMutation: probabilité qu'une coordonnée soit mutée (0.0 à 1.0)
-        :param aAmplitude: intensité maximale de la mutation (variation ±)
+        :param aTauxMutation: probabilité qu’un gène soit muté
         """
-        self.taux_mutation = aTauxMutation
-        self.amplitude = aAmplitude
+        self.taux = aTauxMutation
+
+
+    def _mutation_binaire(self, code_binaire: str) -> str:
+        """Inverse aléatoirement des bits selon le taux de mutation."""
+        nouveau_code = ""
+
+        for bit in code_binaire:
+            if random.random() < self.taux:
+                nouveau_code += "1" if bit == "0" else "0"
+            else:
+                nouveau_code += bit
+
+        return nouveau_code
+
+
+    def _mutation_reelle(self, individu):
+        """Applique une petite variation dans la fenêtre de chaque coordonnée."""
+        for coord in individu.coordonnees:
+            if random.random() < self.taux:
+                amplitude = (coord.fenetre.borne_max - coord.fenetre.borne_min) * 0.1
+                delta = random.uniform(-amplitude, amplitude)
+                nouvelle_valeur = coord.valeur + delta
+
+                # On reste dans la fenêtre
+                coord.valeur = max(coord.fenetre.borne_min,
+                                   min(nouvelle_valeur, coord.fenetre.borne_max))
+
 
 
     def muter(self, individu):
         """
-        Applique la mutation sur un individu :
-        - Parcourt toutes ses coordonnées,
-        - Avec une certaine probabilité, modifie légèrement la valeur.
+        Applique la mutation à un individu :
+            - Si individu.code existe → mutation binaire
+            - Sinon → mutation réelle
         """
-        if not hasattr(individu, "coordonnees"):
-            print("L'individu ne possède pas d'attribut 'coordonnees'")
-            return
+        if individu.code is not None:
+            # Mutation du code binaire
+            individu.code = self._mutation_binaire(individu.code)
+            # Décodage vers valeurs réelles
+            individu.decoder()
+        else:
+            # Mutation sur valeurs réelles
+            self._mutation_reelle(individu)
 
-        for i in range(len(individu.coordonnees)):
-            if random.random() < self.taux_mutation:
-                # Valeur avant mutation
-                ancienne_valeur = individu.coordonnees[i]
-                # Ajout d'une petite variation aléatoire
-                delta = random.uniform(-self.amplitude, self.amplitude)
-                nouvelle_valeur = ancienne_valeur + delta
-                individu.coordonnees[i] = nouvelle_valeur
-                print(f"Mutation sur coordonnée {i} : {ancienne_valeur:.3f} ce qui donne {nouvelle_valeur:.3f}")
-
-        # Après mutation, on réinitialise la performance (à réévaluer ensuite)
-        if hasattr(individu, "performance"):
-            individu.performance = None
+        individu.performance = None  # invalide la performance
 
     def __str__(self):
-        return f"OperateurMutation(taux={self.taux_mutation}, amplitude={self.amplitude})"
-    
+        return f"OperateurMutation(taux={self.taux})"
 
-# Test local (exécutable seul)
+
+
+#  TEST LOCAL
 
 if __name__ == "__main__":
-    print("=== Test de la classe OperateurMutation ===")
+    print("Test de OperateurMutation")
 
-    class Individu:
-        def __init__(self, coordonnees):
-            self.coordonnees = coordonnees
-            self.performance = 10
-        def __str__(self):
-            return f"Individu(coords={self.coordonnees}, perf={self.performance})"
 
-    ind = Individu([0.5, -1.2, 3.4])
+
+    # Individu réel
+    f1 = Fenetre("x1", -5, 5)
+    f2 = Fenetre("x2", -5, 5)
+    ind = Individu([f1, f2])
+
     print("Avant mutation :", ind)
 
-    mut = OperateurMutation(aTauxMutation=0.8, aAmplitude=0.5)
+    mut = OperateurMutation(aTauxMutation=1.0)  # mutation forcée pour tester
     mut.muter(ind)
 
     print("Après mutation :", ind)
