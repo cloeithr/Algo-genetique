@@ -7,6 +7,8 @@ Description :
     Son rôle : retourner la valeur f(x) = Σ xi² (parabole).
 """
 
+import math
+
 class Performance:
     """Fonction objectif : parabole multi-dimensionnelle."""
 
@@ -14,6 +16,13 @@ class Performance:
     def evaluate(coordonnees):
         """Calcule f(x) = somme des xi²."""
         return sum(x ** 2 for x in coordonnees)
+    
+    # Première fonction dans benchmarks
+    @staticmethod
+    def schaffer(coordonnees):
+        """Fonction de test Schaffer : f(x,y) = -x*sin(sqrt(|x|)) - y*sin(sqrt(|y|))"""
+        x, y = coordonnees
+        return -x * math.sin(math.sqrt(abs(x))) - y * math.sin(math.sqrt(abs(y)))
 
 
 
