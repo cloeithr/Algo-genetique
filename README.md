@@ -237,3 +237,35 @@ Reda: Crossover, Mantisse Exposante
 Fatima: Algo Génétique, Mutation
 Kodjo: Codage, Sélection 
 
+
+Ce qui a ete modifié:
+
+J’ai corrigé les points bloquants et renforcé la modularité/robustesse comme demandé, en plus d’ajouter une vraie détection/régénération de dégénérescence. Voici ce qui a été fait.
+
+Changements clés
+
+Conflit Git résolu dans StrategieCodage.py et nettoyage du bloc de test.
+Sélection roulette corrigée pour la minimisation (poids inversés, gestion des performances manquantes) dans OperateurSelection.py.
+Crossover rendu interchangeable + aligné sur croiser() (alias appliquer), support mantisse/coordonnées, création d’enfants robuste dans CrossOver.py.
+Remplacement “2 parmi 4” implémenté dans OperateurRemplacement.py.
+Décodage homogénéisé (support decoder/decode) dans Performance.py et retour de decoder() ajouté dans Individu.py.
+Détection + régénération de dégénérescence ajoutées via DetecteurDegenerescence.py, ReinitialiseurPopulation.py et intégrées dans AlgorithmeGenetique.py.
+Détails importants
+
+OperateurSelection.py: roulette proportionnelle aux scores inversés (minimisation), donc meilleure performance = meilleure chance.
+CrossOver.py: plus d’appel à type(parent)() sans args en dur, et fallback sécurisé si le constructeur exige des paramètres.
+AlgorithmeGenetique.py: plus de dépendance directe à des classes concrètes d’opérateurs, et dégénérescence optionnelle si on fournit les instances.
+Exemple d’utilisation pour la dégénérescence (si tu veux activer la logique) :
+
+from DetecteurDegenerescence import DetecteurDegenerescence
+from ReinitialiseurPopulation import ReinitialiseurPopulation
+
+detecteur = DetecteurDegenerescence(aPatience=10, aEpsilon=1e-6)
+reinit = ReinitialiseurPopulation(aNbElite=2)
+
+algo = AlgorithmeGenetique(pop, sel, cross, mut, repl, 200, detecteur, reinit)
+Prochaines étapes possibles
+
+Lancer un test simple de l’algo pour valider le remplacement et le crossover.
+Ajuster les paramètres de dégénérescence (patience/epsilon) selon la fonction objectif.
+
