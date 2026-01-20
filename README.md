@@ -1,6 +1,4 @@
-# Algo-genetique
-
-Informations générales : 
+### Informations générales avant de commencer le TP : 
 
 Pour cloner le repo, créer un dossier où le mettre, déplacer vous dans le dossier puis : git clone https://github.com/cloeithr/Algo-genetique.git
 
